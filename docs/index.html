@@ -11,6 +11,15 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
+  <script>
+    // Auth guard – redirect to login if no session
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('krk_session'));
+        if (!s || !s.name) { window.location.href = 'login.html'; }
+      } catch (e) { window.location.href = 'login.html'; }
+    })();
+  </script>
 </head>
 
 <body>
@@ -64,16 +73,19 @@
       <div class="sidebar-footer">
         <div
           style="display:flex;align-items:center;gap:10px;padding:12px; background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);">
-          <div class="avatar">K</div>
+          <div class="avatar" id="sidebarAvatar">K</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;">KRK User</div>
-            <div style="font-size:11px;color:var(--text-secondary);">Growth Pro</div>
+            <div style="font-size:13px;font-weight:600;" id="sidebarName">KRK User</div>
+            <div style="font-size:11px;color:var(--text-secondary);" id="sidebarRole">Growth Pro</div>
           </div>
           <label class="toggle" title="Dark/Light Mode">
             <input type="checkbox" id="themeToggle" onchange="toggleTheme()" />
             <span class="toggle-slider"></span>
           </label>
         </div>
+        <button onclick="logoutUser()"
+          style="width:100%;margin-top:8px;padding:8px;background:rgba(255,71,71,0.1);color:#ff7070;border:1px solid rgba(255,71,71,0.2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">🚪
+          Logout</button>
       </div>
     </nav>
 
@@ -148,6 +160,12 @@
   <script src="app.js"></script>
   <script src="pages2.js"></script>
   <script src="pages3.js"></script>
+  <script>
+    // Init: load session info then go to dashboard
+    loadUserSession();
+    navigate('dashboard');
+  </script>
 </body>
+
 
 </html>
