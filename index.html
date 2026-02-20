@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <meta name="theme-color" content="#6c47ff" />
+  <meta name="description"
+    content="AI Marketing Automation Platform – Create, Optimize & Share High-Conversion Content" />
+  <title>KRK Growth Engine – AI Marketing Platform</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div id="app">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">🔥</div>
+        <div class="logo-text">KRK Growth Engine<span>AI Marketing Platform</span></div>
+      </div>
+      <span class="nav-section-label">Main</span>
+      <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" data-page="content" onclick="navigate('content')">
+        <span class="nav-icon">✨</span> AI Content Engine
+        <span class="nav-badge">New</span>
+      </a>
+      <a class="nav-item" data-page="campaign" onclick="navigate('campaign')">
+        <span class="nav-icon">🚀</span> Campaign Builder
+      </a>
+      <a class="nav-item" data-page="calendar" onclick="navigate('calendar')">
+        <span class="nav-icon">📅</span> Content Calendar
+      </a>
+      <span class="nav-section-label">Growth</span>
+      <a class="nav-item" data-page="share" onclick="navigate('share')">
+        <span class="nav-icon">📤</span> Multi-Share Hub
+      </a>
+      <a class="nav-item" data-page="leads" onclick="navigate('leads')">
+        <span class="nav-icon">🎯</span> Lead Capture
+      </a>
+      <a class="nav-item" data-page="viral" onclick="navigate('viral')">
+        <span class="nav-icon">⚡</span> Viral Predictor
+      </a>
+      <a class="nav-item" data-page="gamification" onclick="navigate('gamification')">
+        <span class="nav-icon">🏆</span> My Progress
+      </a>
+      <span class="nav-section-label">Specialty</span>
+      <a class="nav-item" data-page="insurance" onclick="navigate('insurance')">
+        <span class="nav-icon">🛡️</span> Insurance Mode
+      </a>
+      <a class="nav-item" data-page="admin" onclick="navigate('admin')">
+        <span class="nav-icon">⚙️</span> Admin Panel
+      </a>
+      <div class="sidebar-footer">
+        <div
+          style="display:flex;align-items:center;gap:10px;padding:12px; background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <div class="avatar">K</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;">KRK User</div>
+            <div style="font-size:11px;color:var(--text-secondary);">Growth Pro</div>
+          </div>
+          <label class="toggle" title="Dark/Light Mode">
+            <input type="checkbox" id="themeToggle" onchange="toggleTheme()" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main" id="main">
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+          </button>
+          <div>
+            <div class="topbar-title" id="topbarTitle">Dashboard</div>
+            <div class="topbar-subtitle" id="topbarSubtitle">Welcome back, KRK User 👋</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-icon" onclick="showInstallPrompt()" title="Install App">📲</button>
+          <button class="btn-icon" style="position:relative;" onclick="navigate('leads')">
+            🔔<span class="notif-dot"></span>
+          </button>
+          <div class="avatar" onclick="navigate('gamification')">K</div>
+        </div>
+      </div>
+
+      <!-- PAGE CONTAINER -->
+      <div id="pageContainer" class="page-content animate-in"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-items">
+        <button class="bottom-nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+          <span class="bn-icon">📊</span><span class="bn-label">Home</span>
+        </button>
+        <button class="bottom-nav-item" data-page="content" onclick="navigate('content')">
+          <span class="bn-icon">✨</span><span class="bn-label">Create</span>
+        </button>
+        <button class="bottom-nav-item" data-page="share" onclick="navigate('share')">
+          <span class="bn-icon">📤</span><span class="bn-label">Share</span>
+        </button>
+        <button class="bottom-nav-item" data-page="leads" onclick="navigate('leads')">
+          <span class="bn-icon">🎯</span><span class="bn-label">Leads</span>
+        </button>
+        <button class="bottom-nav-item" data-page="gamification" onclick="navigate('gamification')">
+          <span class="bn-icon">🏆</span><span class="bn-label">Progress</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- SHARE MODAL -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📤 Share Content</div>
+      <div id="shareModalCaption"
+        style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:14px;margin-bottom:16px;color:var(--text-secondary);line-height:1.6;">
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:16px;" onclick="copyCaption()">📋 Copy Caption to
+        Clipboard</button>
+      <div class="share-grid" id="shareModalGrid"></div>
+      <button class="btn btn-outline" style="width:100%;margin-top:16px;"
+        onclick="closeModal('shareModal')">Close</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="pages2.js"></script>
+  <script src="pages3.js"></script>
+</body>
+
+</html>
