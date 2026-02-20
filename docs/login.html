@@ -244,9 +244,11 @@
         .alert {
             font-size: 12px;
             margin-bottom: 12px;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 8px;
             display: none;
+            white-space: pre-line;
+            line-height: 1.6;
         }
 
         .alert-error {
@@ -257,6 +259,30 @@
         .alert-success {
             color: var(--success);
             background: rgba(34, 197, 94, 0.1);
+        }
+
+        .otp-box {
+            background: rgba(108, 71, 255, 0.15);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .otp-num {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: var(--accent);
+            font-family: monospace;
+        }
+
+        .otp-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         .otp-row {
@@ -283,10 +309,6 @@
             cursor: pointer;
             white-space: nowrap;
             font-size: 13px;
-        }
-
-        #recaptcha-container {
-            margin-bottom: 12px;
         }
 
         .loading-spin {
@@ -321,7 +343,7 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('mobile')">📱 Mobile OTP</button>
+            <button class="tab active" onclick="switchTab('mobile')">📱 Mobile Login</button>
             <button class="tab" onclick="switchTab('google')">🔑 Google Login</button>
         </div>
 
@@ -330,20 +352,25 @@
             <div id="mob-error" class="alert alert-error"></div>
             <div id="mob-success" class="alert alert-success"></div>
 
+            <!-- Step 1: Name + Phone -->
             <div id="step1">
                 <label>Your Full Name</label>
                 <input type="text" id="userName" placeholder="e.g. Rajesh Kumar" autocomplete="name" />
                 <label>Indian Mobile Number</label>
                 <input type="tel" id="userPhone" placeholder="+91 98765 43210" maxlength="14" autocomplete="tel" />
-                <div id="recaptcha-container"></div>
-                <button class="btn btn-otp" id="sendOtpBtn" onclick="sendOTP()">📲 Send OTP via SMS</button>
+                <button class="btn btn-otp" id="sendOtpBtn" onclick="sendOTP()">📲 Generate OTP</button>
             </div>
 
+            <!-- Step 2: Show OTP + Enter -->
             <div id="step2" style="display:none;">
-                <label>Enter 6-digit OTP (sent to your mobile)</label>
+                <div class="otp-box" id="otpDisplay">
+                    <div class="otp-num" id="otpNumber">------</div>
+                    <div class="otp-label">Your Login OTP — Enter below</div>
+                </div>
+                <label>Enter OTP</label>
                 <div class="otp-row">
-                    <input type="number" id="otpCode" placeholder="••••••" maxlength="6" />
-                    <button onclick="resendOTP()">Resend</button>
+                    <input type="number" id="otpCode" placeholder="Enter OTP" maxlength="6" />
+                    <button onclick="resendOTP()">New OTP</button>
                 </div>
                 <button class="btn btn-primary" onclick="verifyOTP()">✅ Verify & Login</button>
                 <button class="btn"
@@ -357,7 +384,7 @@
             <div id="goog-error" class="alert alert-error"></div>
             <label>Your Full Name</label>
             <input type="text" id="googleName" placeholder="e.g. Rajesh Kumar" autocomplete="name" />
-            <label>Gmail Address</label>
+            <label>Email Address</label>
             <input type="email" id="googleEmail" placeholder="you@gmail.com" autocomplete="email" />
             <button class="btn btn-google" onclick="loginWithGoogle()">
                 <svg width="20" height="20" viewBox="0 0 48 48">
@@ -370,13 +397,12 @@
                     <path fill="#1976D2"
                         d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.4 4.3-4.4 5.7l6.6 5.4C42 36.2 44 30.5 44 24c0-1.2-.1-2.4-.4-3.5z" />
                 </svg>
-                Continue with Google
+                Continue with Google / Email
             </button>
         </div>
 
         <div class="divider">or</div>
 
-        <!-- ADMIN -->
         <div id="admin-error" class="alert alert-error"></div>
         <button class="btn btn-admin" onclick="toggleAdminForm()">⚙️ Admin Login</button>
         <div id="admin-form" style="display:none;">
@@ -386,64 +412,29 @@
                 onclick="adminLogin()">🔐 Login as Admin</button>
         </div>
 
-        <div class="footer-note">🔒 Secured by Firebase · Data stays private</div>
+        <div class="footer-note">🔒 Secured login · No data shared externally</div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
     <script>
-        // ===== FIREBASE INIT =====
-        const firebaseConfig = {
-            apiKey: "AIzaSyAR89XtXkl05EfBzPXRHCzhqJecPpQx5NY",
-            authDomain: "krkdigitalgrowth-5f2c7.firebaseapp.com",
-            projectId: "krkdigitalgrowth-5f2c7",
-            storageBucket: "krkdigitalgrowth-5f2c7.firebasestorage.app",
-            messagingSenderId: "520135023627",
-            appId: "1:520135023627:web:6c676361900d83f2e4fb0e",
-            measurementId: "G-XC2SPKQP20"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        auth.languageCode = 'en';
-
-        var confirmationResult = null;
-        var recaptchaVerifier = null;
         var ADMIN_PASSWORD = "KRK@Admin2024";
+        var _generatedOTP = "";
+        var _pendingName = "";
+        var _pendingPhone = "";
 
-        // Auto-login check
         window.onload = function () {
             var s = getSession();
             if (s && s.name) redirect(s.role);
-            setupRecaptcha();
         };
 
-        function setupRecaptcha() {
-            try {
-                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': function () { }
-                });
-                recaptchaVerifier.render();
-            } catch (e) { console.log('reCAPTCHA setup:', e.message); }
-        }
-
-        // ===== SESSION =====
         function getSession() {
             try { return JSON.parse(localStorage.getItem('krk_session')); } catch (e) { return null; }
         }
         function setSession(name, phone, email, role) {
-            localStorage.setItem('krk_session', JSON.stringify({
-                name: name, phone: phone, email: email, role: role,
-                loginTime: new Date().toISOString()
-            }));
+            localStorage.setItem('krk_session', JSON.stringify({ name: name, phone: phone, email: email, role: role, loginTime: new Date().toISOString() }));
         }
         function redirect(role) {
             window.location.href = role === 'admin' ? 'index.html?admin=true' : 'index.html';
         }
-
-        // ===== TABS =====
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(function (t, i) {
                 t.classList.toggle('active', (i === 0 && tab === 'mobile') || (i === 1 && tab === 'google'));
@@ -452,117 +443,69 @@
             document.getElementById('panel-google').classList.toggle('active', tab === 'google');
         }
 
-        // ===== PHONE FORMAT =====
-        function formatPhone(val) {
-            val = val.replace(/\D/g, '');
-            if (val.startsWith('91') && val.length > 10) val = val.slice(2);
-            return '+91' + val.slice(0, 10);
-        }
-
-        // ===== SEND REAL OTP VIA FIREBASE =====
+        // Generate & show OTP on screen
         function sendOTP() {
             var name = document.getElementById('userName').value.trim();
-            var raw = document.getElementById('userPhone').value.trim();
+            var phone = document.getElementById('userPhone').value.trim();
             hideAlerts();
-
             if (!name) { showAlert('mob-error', 'Please enter your full name.'); return; }
-            if (!raw) { showAlert('mob-error', 'Please enter your mobile number.'); return; }
-
-            var phone = formatPhone(raw.replace(/\s/g, ''));
-            if (phone.replace(/\D/g, '').length < 12) {
+            if (!phone || phone.replace(/\D/g, '').length < 10) {
                 showAlert('mob-error', 'Please enter a valid 10-digit Indian mobile number.'); return;
             }
+            _pendingName = name;
+            _pendingPhone = phone;
+            _generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
             var btn = document.getElementById('sendOtpBtn');
-            btn.innerHTML = '<span class="loading-spin">⏳</span> Sending OTP...';
+            btn.innerHTML = '<span class="loading-spin">⏳</span> Generating...';
             btn.disabled = true;
 
-            // Reset reCAPTCHA if needed
-            if (!recaptchaVerifier) setupRecaptcha();
-
-            auth.signInWithPhoneNumber(phone, recaptchaVerifier)
-                .then(function (result) {
-                    confirmationResult = result;
-                    window._pendingName = name;
-                    window._pendingPhone = phone;
-                    document.getElementById('step1').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
-                    showAlert('mob-success', '✅ OTP sent to ' + phone + '! Check your SMS.');
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    btn.innerHTML = '📲 Send OTP via SMS';
-                    btn.disabled = false;
-                    if (err.code === 'auth/invalid-phone-number') {
-                        showAlert('mob-error', '❌ Invalid phone number. Please enter a valid Indian number.');
-                    } else if (err.code === 'auth/too-many-requests') {
-                        showAlert('mob-error', '❌ Too many attempts. Please try again later.');
-                    } else {
-                        showAlert('mob-error', '❌ Error: ' + err.message);
-                    }
-                    // Reset reCAPTCHA on error
-                    recaptchaVerifier = null;
-                    setupRecaptcha();
-                });
+            setTimeout(function () {
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
+                document.getElementById('otpDisplay').style.display = 'block';
+                document.getElementById('otpNumber').textContent = _generatedOTP;
+            }, 700);
         }
 
         function resendOTP() {
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('sendOtpBtn').innerHTML = '📲 Send OTP via SMS';
-            document.getElementById('sendOtpBtn').disabled = false;
-            recaptchaVerifier = null;
-            setupRecaptcha();
-            hideAlerts();
+            _generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('otpNumber').textContent = _generatedOTP;
+            document.getElementById('otpCode').value = '';
+            showAlert('mob-success', '🔄 New OTP generated above!');
         }
 
         function backToStep1() {
-            recaptchaVerifier = null; setupRecaptcha();
             document.getElementById('step2').style.display = 'none';
             document.getElementById('step1').style.display = 'block';
-            document.getElementById('sendOtpBtn').innerHTML = '📲 Send OTP via SMS';
+            document.getElementById('sendOtpBtn').innerHTML = '📲 Generate OTP';
             document.getElementById('sendOtpBtn').disabled = false;
             hideAlerts();
         }
 
-        // ===== VERIFY OTP =====
         function verifyOTP() {
             var code = document.getElementById('otpCode').value.trim();
-            if (!code || code.length < 6) { showAlert('mob-error', 'Please enter the 6-digit OTP.'); return; }
-            showAlert('mob-success', '⏳ Verifying...');
-
-            confirmationResult.confirm(code)
-                .then(function (result) {
-                    var name = window._pendingName || result.user.displayName || 'KRK User';
-                    var phone = window._pendingPhone || result.user.phoneNumber || '';
-                    setSession(name, phone, '', 'user');
-                    showAlert('mob-success', '✅ Login successful! Loading app...');
-                    setTimeout(function () { redirect('user'); }, 1000);
-                })
-                .catch(function (err) {
-                    if (err.code === 'auth/invalid-verification-code') {
-                        showAlert('mob-error', '❌ Wrong OTP! Please check and try again.');
-                    } else {
-                        showAlert('mob-error', '❌ ' + err.message);
-                    }
-                });
+            if (!code) { showAlert('mob-error', 'Please enter the OTP shown above.'); return; }
+            if (code === _generatedOTP) {
+                setSession(_pendingName, _pendingPhone, '', 'user');
+                showAlert('mob-success', '✅ Login successful! Loading app...');
+                setTimeout(function () { redirect('user'); }, 900);
+            } else {
+                showAlert('mob-error', '❌ Wrong OTP! Please enter the OTP shown in the box above.');
+            }
         }
 
-        // ===== GOOGLE LOGIN (email-based, no real OAuth - uses stored name+email) =====
         function loginWithGoogle() {
             var name = document.getElementById('googleName').value.trim();
             var email = document.getElementById('googleEmail').value.trim();
             hideAlerts();
-
             if (!name) { showAlert('goog-error', 'Please enter your full name.'); return; }
-            if (!email || !email.includes('@')) { showAlert('goog-error', 'Please enter a valid Gmail address.'); return; }
-
+            if (!email || !email.includes('@')) { showAlert('goog-error', 'Please enter a valid email address.'); return; }
             var isAdmin = ['krkgrowth@gmail.com', 'admin@krk.com'].indexOf(email.toLowerCase()) !== -1;
             setSession(name, '', email, isAdmin ? 'admin' : 'user');
             setTimeout(function () { redirect(isAdmin ? 'admin' : 'user'); }, 500);
         }
 
-        // ===== ADMIN LOGIN =====
         function toggleAdminForm() {
             var f = document.getElementById('admin-form');
             f.style.display = f.style.display === 'none' ? 'block' : 'none';
@@ -577,15 +520,13 @@
             }
         }
 
-        // ===== HELPERS =====
         function showAlert(id, msg) {
             var el = document.getElementById(id);
             if (el) { el.textContent = msg; el.style.display = 'block'; }
         }
         function hideAlerts() {
             ['mob-error', 'mob-success', 'goog-error', 'admin-error'].forEach(function (id) {
-                var el = document.getElementById(id);
-                if (el) el.style.display = 'none';
+                var el = document.getElementById(id); if (el) el.style.display = 'none';
             });
         }
     </script>
