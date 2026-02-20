@@ -1,14 +1,19 @@
-const CACHE_NAME = 'krk-growth-engine-v1';
+const CACHE_NAME = 'krk-growth-engine-v3';
 const ASSETS = [
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json'
+  './',
+  './login.html',
+  './index.html',
+  './style.css',
+  './app.js',
+  './data.js',
+  './pages2.js',
+  './pages3.js',
+  './manifest.json'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => { }))
   );
   self.skipWaiting();
 });
@@ -25,16 +30,5 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
-  );
-});
-
-self.addEventListener('push', event => {
-  const data = event.data ? event.data.json() : {};
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'KRK Growth Engine', {
-      body: data.body || 'New update available!',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png'
-    })
   );
 });
