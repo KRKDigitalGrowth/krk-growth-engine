@@ -1,11 +1,20 @@
-// ===== GLOBAL CAPTION STORE (safe - no text in onclick) =====
+// ===== PRE-DEFINED TEMPLATES (10 ready-to-use) =====
 var SHARE_CAPTIONS = [
-  { title: 'Policy Awareness', cat: 'insurance', text: 'Shield your family from financial disaster! One medical emergency can cost lakhs. Get the RIGHT insurance coverage today. FREE consultation available. Call me now!' },
-  { title: 'Lead Magnet', cat: 'leads', text: 'FREE Financial Health Check - Limited to first 20 people only! I will review your existing policy and tell you if you are overpaying. DM me NOW before slots fill up!' },
-  { title: 'Motivational', cat: 'motivational', text: 'Success is not just about earning more. It is about protecting what you have built. Your family, your legacy, your future - all deserve the best protection. Secure your legacy today. Call me!' }
+  { title: 'Policy Awareness', cat: '🛡️ Insurance', text: 'Is your family protected from financial disaster? One medical emergency can cost LAKHS! Get the RIGHT insurance coverage today. FREE consultation available. Call me now!' },
+  { title: 'Lead Magnet', cat: '🎯 Leads', text: 'FREE Financial Health Check - Limited to first 20 people only! I will review your existing policy and tell you if you are overpaying. DM me NOW before slots fill up!' },
+  { title: 'Motivational', cat: '💪 Motivation', text: 'Success is not just about earning more. It is about protecting what you have built. Your family, your legacy, your future all deserve the best protection. Secure your legacy today. Call me!' },
+  { title: 'Term Insurance', cat: '🛡️ Insurance', text: 'Did you know? A 1 Crore Term Insurance plan costs less than your monthly coffee budget! Protect your family for just Rs.500 per month. Today is the best day to start. Call me now for FREE advice!' },
+  { title: 'Health Insurance', cat: '❤️ Health', text: 'Medical bills are the No.1 cause of family financial stress in India. A good Health Insurance plan protects your savings completely. Get covered today before any health issue strikes. DM me for best rates!' },
+  { title: 'Festival Offer', cat: '🎉 Festival', text: 'This festive season, give your family the GIFT OF SECURITY! Special limited-time insurance plans available now. Extra benefits, lower premiums, lifetime coverage. Call me today - offer ends soon!' },
+  { title: 'Myth Buster', cat: '💡 Education', text: 'MYTH: Insurance is only for old people. FACT: The younger you start, the LOWER your premium and HIGHER your benefits! Start at 25, save lakhs compared to starting at 40. Act now. Message me!' },
+  { title: 'Retirement Plan', cat: '👴 Pension', text: 'Imagine retiring at 55 with a guaranteed monthly income of Rs.50,000 for life! That is possible with the RIGHT pension plan started today. Do not leave your retirement to chance. Call me now!' },
+  { title: 'Child Plan', cat: '👶 Child', text: 'Your child dreams of becoming a doctor, engineer, or cricketer. Will YOUR savings be enough in 15 years? A Child Education Plan TODAY guarantees their future. Invest Rs.2000/month. DM me for details!' },
+  { title: 'Client Testimonial', cat: '⭐ Testimonial', text: 'My client Ravi saved Rs.3 Lakhs on his tax this year AND secured his family with a 2 Crore insurance cover - all in one smart plan! Want the same for your family? Call me today - FREE consultation!' }
 ];
 
-// Read caption safely from the DOM element
+// Selected image (base64) for attachment
+var SELECTED_IMAGE = null;
+
 function getCapText(idx) {
   var el = document.getElementById('shcap-' + idx);
   return el ? el.innerText : (SHARE_CAPTIONS[idx] ? SHARE_CAPTIONS[idx].text : '');
@@ -30,7 +39,6 @@ function sharePlatform(platform, idx) {
 
 function shareAllPlatforms(idx) {
   var text = getCapText(idx);
-  // Show the share modal with caption
   document.getElementById('shareModalCaption').textContent = text;
   var waMsg = encodeURIComponent(text);
   var platforms = [
@@ -64,15 +72,73 @@ function copyCapIdx(idx) {
   }
 }
 
+// ===== IMAGE ATTACHMENT =====
+function triggerImagePick(idx) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      SELECTED_IMAGE = ev.target.result;
+      var preview = document.getElementById('img-preview-' + idx);
+      if (preview) {
+        preview.innerHTML = '<img src="' + SELECTED_IMAGE + '" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;" />' +
+          '<div style="display:flex;gap:8px;margin-top:8px;">' +
+          '<button class="btn btn-ghost btn-sm" style="flex:1;" onclick="saveImageToPhone()">💾 Save Image</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="removeImage(' + idx + ')">✕ Remove</button></div>';
+      }
+      toast('Image attached! Copy caption + share image together.', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function removeImage(idx) {
+  SELECTED_IMAGE = null;
+  var preview = document.getElementById('img-preview-' + idx);
+  if (preview) preview.innerHTML = '';
+  toast('Image removed', 'info');
+}
+
+function saveImageToPhone() {
+  if (!SELECTED_IMAGE) return;
+  var a = document.createElement('a');
+  a.href = SELECTED_IMAGE;
+  a.download = 'krk-post-image.png';
+  a.click();
+  toast('Image saved! Now share caption + image together.', 'success');
+}
+
 // ===== MULTI SHARE HUB PAGE =====
 function renderShare() {
+  var filterBtns = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">' +
+    '<button class="btn btn-primary btn-sm" onclick="filterTemplates(\'all\')">All</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="filterTemplates(\'Insurance\')">🛡️ Insurance</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="filterTemplates(\'Health\')">❤️ Health</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="filterTemplates(\'Leads\')">🎯 Leads</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="filterTemplates(\'Festival\')">🎉 Festival</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="filterTemplates(\'Motivation\')">💪 Motivation</button>' +
+    '</div>';
+
   var cards = SHARE_CAPTIONS.map(function (c, i) {
-    return '<div class="content-card">' +
+    return '<div class="content-card template-card" data-cat="' + c.cat + '">' +
       '<div class="content-card-header">' +
       '<div><strong>' + c.title + '</strong><div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">' + c.cat + '</div></div>' +
       '<span class="badge badge-purple">Ready</span>' +
       '</div>' +
       '<div class="content-text" id="shcap-' + i + '">' + c.text + '</div>' +
+
+      // Image attachment zone
+      '<div id="img-preview-' + i + '"></div>' +
+      '<div style="margin-top:10px;">' +
+      '<button class="btn btn-ghost btn-sm" style="width:100%;border:1px dashed var(--border);" onclick="triggerImagePick(' + i + ')">📎 Attach Image / Poster</button>' +
+      '</div>' +
+
+      // Share buttons
       '<div class="share-grid" style="margin-top:12px;">' +
       '<button class="share-btn whatsapp" onclick="sharePlatform(\'whatsapp\',' + i + ')"><span class="share-icon">💬</span>WhatsApp</button>' +
       '<button class="share-btn instagram" onclick="sharePlatform(\'instagram\',' + i + ')"><span class="share-icon">📸</span>Instagram</button>' +
@@ -88,14 +154,26 @@ function renderShare() {
       '</div>';
   }).join('');
 
-  return '<div class="ai-suggestion" style="margin-bottom:20px;">' +
+  return '<div class="ai-suggestion" style="margin-bottom:16px;">' +
     '<div class="ai-tag">🤖 AI Recommendation</div>' +
     '<strong>Best time to share today: 7–9 PM</strong> · WhatsApp & Instagram are most active now.' +
     '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:16px;">' + cards + '</div>' +
+    filterBtns +
+    '<div id="templatesList" style="display:flex;flex-direction:column;gap:16px;">' + cards + '</div>' +
     '<div style="text-align:center;margin-top:20px;">' +
-    '<button class="btn btn-primary btn-lg" onclick="navigate(\'content\')">✨ Generate More Content</button>' +
+    '<button class="btn btn-primary btn-lg" onclick="navigate(\'content\')">✨ Generate Custom AI Content</button>' +
     '</div>';
+}
+
+function filterTemplates(cat) {
+  var cards = document.querySelectorAll('.template-card');
+  cards.forEach(function (card) {
+    if (cat === 'all' || card.getAttribute('data-cat').indexOf(cat) !== -1) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
 }
 
 // ===== CAMPAIGN BUILDER =====
@@ -198,18 +276,18 @@ function renderCalendar() {
 }
 
 function calDayClick(d, type) {
-  var labels = { completed: '✅ Post completed on this day', scheduled: '📅 Post scheduled', missed: '❌ Missed post – create now!', '': 'No post planned – add one?' };
+  var labels = { completed: '✅ Post completed on this day', scheduled: '📅 Post scheduled', missed: '❌ Missed post - create now!', '': 'No post planned - add one?' };
   toast(labels[type] || 'Click to plan a post', type === 'missed' ? 'warning' : 'info');
   if (type === '' || type === 'missed') setTimeout(function () { navigate('content'); }, 1000);
 }
 
 // ===== LEADS =====
 function renderLeads() {
-  var rows = STATE.leads.map(function (l) {
+  var rows = STATE.leads.map(function (l, idx) {
     var statusClass = l.status === 'Hot' ? 'badge-pink' : l.status === 'Warm' ? 'badge-gold' : 'badge-blue';
     return '<tr><td><strong>' + l.name + '</strong></td><td>' + l.interest + '</td><td>' + l.source + '</td><td>' + l.date + '</td>' +
       '<td><span class="badge ' + statusClass + '">' + l.status + '</span></td>' +
-      '<td><button class="btn btn-ghost btn-sm" onclick="chatWithLead(' + STATE.leads.indexOf(l) + ')">💬 Chat</button></td></tr>';
+      '<td><button class="btn btn-ghost btn-sm" onclick="chatWithLead(' + idx + ')">💬 Chat</button></td></tr>';
   }).join('');
   return '<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">' +
     '<div class="stat-card purple"><div class="stat-icon">🎯</div><div class="stat-value">' + STATE.leads.length + '</div><div class="stat-label">Total Leads</div></div>' +
