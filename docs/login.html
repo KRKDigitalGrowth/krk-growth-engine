@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>KRK Growth Engine – Login</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+        :root {
+            --accent: #6c47ff;
+            --accent-2: #ff47c7;
+            --bg: #0d0d1a;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f0f0ff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --danger: #ff4747;
+            --success: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(108, 71, 255, 0.25);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 71, 199, 0.2);
+            bottom: -80px;
+            right: -80px;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.08)
+            }
+        }
+
+        .logo-title {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6c47ff, #ff47c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #6c47ff, #9370ff);
+            color: white;
+        }
+
+        /* PANELS */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 15px;
+            margin-bottom: 16px;
+            transition: border 0.2s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c47ff, #ff47c7);
+            color: white;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-otp {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-admin {
+            background: rgba(255, 71, 71, 0.12);
+            color: #ff7070;
+            border: 1px solid rgba(255, 71, 71, 0.25);
+            font-size: 13px;
+            padding: 12px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 12px;
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: rgba(255, 71, 71, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success-msg {
+            color: var(--success);
+            font-size: 12px;
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .otp-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .otp-row input {
+            flex: 1;
+            margin-bottom: 0;
+            letter-spacing: 4px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .otp-row button {
+            padding: 0 16px;
+            background: linear-gradient(135deg, #6c47ff, #9370ff);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: rgba(255, 71, 71, 0.15);
+            color: #ff7070;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .loading {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="login-box">
+        <!-- LOGO -->
+        <div class="logo">
+            <span class="logo-icon">🔥</span>
+            <div class="logo-title">KRK Growth Engine</div>
+            <div class="logo-sub">AI Marketing Automation Platform</div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('mobile')">📱 Mobile Login</button>
+            <button class="tab" onclick="switchTab('google')">🔑 Google Login</button>
+        </div>
+
+        <!-- MOBILE LOGIN PANEL -->
+        <div class="panel active" id="panel-mobile">
+            <div id="mobile-error" class="error-msg"></div>
+            <div id="mobile-success" class="success-msg"></div>
+
+            <div id="step-details">
+                <label>Your Full Name</label>
+                <input type="text" id="userName" placeholder="e.g. Rajesh Kumar" autocomplete="name" />
+
+                <label>Indian Mobile Number</label>
+                <input type="tel" id="userPhone" placeholder="+91 98765 43210" maxlength="13" autocomplete="tel"
+                    oninput="formatPhone(this)" />
+
+                <div id="otp-section" style="display:none;">
+                    <label>Enter OTP (sent to your mobile)</label>
+                    <div class="otp-row">
+                        <input type="number" id="otpInput" placeholder="• • • • • •" maxlength="6" />
+                        <button onclick="resendOTP()">Resend</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="verifyOTP()">✅ Verify & Login</button>
+                </div>
+
+                <button class="btn btn-otp" id="sendOTPBtn" onclick="sendOTP()">📲 Send OTP</button>
+            </div>
+        </div>
+
+        <!-- GOOGLE LOGIN PANEL -->
+        <div class="panel" id="panel-google">
+            <div id="google-error" class="error-msg"></div>
+            <label>Your Full Name</label>
+            <input type="text" id="googleName" placeholder="e.g. Rajesh Kumar" autocomplete="name" />
+            <label>Gmail Address</label>
+            <input type="email" id="googleEmail" placeholder="you@gmail.com" autocomplete="email" />
+            <button class="btn btn-google" onclick="loginWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#FFC107"
+                        d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 2.9l5.7-5.7C34.5 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z" />
+                    <path fill="#FF3D00"
+                        d="M6.3 14.7l6.6 4.8C14.5 15.8 18.9 13 24 13c3.1 0 5.8 1.1 7.9 2.9l5.7-5.7C34.5 6.5 29.6 4 24 4 16.3 4 9.6 8.3 6.3 14.7z" />
+                    <path fill="#4CAF50"
+                        d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.4C29.7 34.9 27 36 24 36c-5.2 0-9.6-3.3-11.3-8L6 32.8C9.3 39.5 16.1 44 24 44z" />
+                    <path fill="#1976D2"
+                        d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.4 4.3-4.4 5.7l6.6 5.4C42. 36.2 44 30.5 44 24c0-1.2-.1-2.4-.4-3.5z" />
+                </svg>
+                Continue with Google
+            </button>
+        </div>
+
+        <div class="divider">or</div>
+
+        <!-- ADMIN LOGIN -->
+        <div id="admin-section">
+            <div id="admin-error" class="error-msg"></div>
+            <button class="btn btn-admin" onclick="toggleAdminForm()">⚙️ Admin Login</button>
+            <div id="admin-form" style="display:none;">
+                <label>Admin Password</label>
+                <input type="password" id="adminPass" placeholder="Enter admin password" autocomplete="off" />
+                <button class="btn btn-primary" onclick="adminLogin()"
+                    style="background:linear-gradient(135deg,#ff4747,#ff7070);">
+                    🔐 Login as Admin
+                </button>
+            </div>
+        </div>
+
+        <div class="footer-note">🔒 Your data stays on your device. No server required.</div>
+    </div>
+
+    <script>
+        // ===== CONFIG =====
+        var ADMIN_PASSWORD = "KRK@Admin2024";
+        var ADMIN_EMAILS = ["krkgrowth@gmail.com", "admin@krk.com"];
+        var DEMO_OTP = "123456"; // For demo — in production use real SMS API
+        var generatedOTP = "";
+        var pendingPhone = "";
+
+        // ===== AUTO-LOGIN CHECK =====
+        window.onload = function () {
+            var session = getSession();
+            if (session) {
+                redirect(session.role);
+            }
+        };
+
+        function getSession() {
+            try { return JSON.parse(localStorage.getItem('krk_session')); } catch (e) { return null; }
+        }
+
+        function setSession(name, phone, email, role) {
+            localStorage.setItem('krk_session', JSON.stringify({
+                name: name, phone: phone, email: email, role: role,
+                loginTime: new Date().toISOString()
+            }));
+        }
+
+        function redirect(role) {
+            if (role === 'admin') {
+                window.location.href = 'index.html?admin=true';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ===== TABS =====
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(function (t, i) {
+                t.classList.toggle('active', (i === 0 && tab === 'mobile') || (i === 1 && tab === 'google'));
+            });
+            document.getElementById('panel-mobile').classList.toggle('active', tab === 'mobile');
+            document.getElementById('panel-google').classList.toggle('active', tab === 'google');
+        }
+
+        // ===== PHONE FORMAT =====
+        function formatPhone(input) {
+            var val = input.value.replace(/\D/g, '');
+            if (val.length > 0 && !input.value.startsWith('+91')) {
+                input.value = '+91' + val.slice(0, 10);
+            }
+        }
+
+        // ===== MOBILE OTP LOGIN =====
+        function sendOTP() {
+            var name = document.getElementById('userName').value.trim();
+            var phone = document.getElementById('userPhone').value.trim();
+            hideMessages();
+
+            if (!name) { showError('mobile-error', 'Please enter your full name.'); return; }
+            if (!phone || phone.replace(/\D/g, '').length < 10) {
+                showError('mobile-error', 'Please enter a valid 10-digit Indian mobile number.'); return;
+            }
+
+            // Generate 6-digit OTP (demo: always 123456 — replace with SMS API for real OTP)
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            pendingPhone = phone;
+
+            document.getElementById('sendOTPBtn').innerHTML = '<span class="loading">⏳</span> Sending...';
+            setTimeout(function () {
+                document.getElementById('otp-section').style.display = 'block';
+                document.getElementById('sendOTPBtn').style.display = 'none';
+                showSuccess('mobile-success', '✅ OTP sent to ' + phone + ' (Demo OTP: ' + generatedOTP + ')');
+            }, 1200);
+        }
+
+        function resendOTP() {
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            showSuccess('mobile-success', '✅ New OTP sent: ' + generatedOTP);
+        }
+
+        function verifyOTP() {
+            var entered = document.getElementById('otpInput').value.trim();
+            var name = document.getElementById('userName').value.trim();
+            if (entered === generatedOTP) {
+                setSession(name, pendingPhone, '', 'user');
+                showSuccess('mobile-success', '✅ Login successful! Redirecting...');
+                setTimeout(function () { redirect('user'); }, 1000);
+            } else {
+                showError('mobile-error', '❌ Wrong OTP. Please try again.');
+            }
+        }
+
+        // ===== GOOGLE LOGIN =====
+        function loginWithGoogle() {
+            var name = document.getElementById('googleName').value.trim();
+            var email = document.getElementById('googleEmail').value.trim();
+            hideMessages();
+
+            if (!name) { showError('google-error', 'Please enter your full name.'); return; }
+            if (!email || !email.includes('@gmail.com')) {
+                showError('google-error', 'Please enter a valid Gmail address (@gmail.com).'); return;
+            }
+
+            var isAdmin = ADMIN_EMAILS.indexOf(email.toLowerCase()) !== -1;
+            setSession(name, '', email, isAdmin ? 'admin' : 'user');
+            setTimeout(function () { redirect(isAdmin ? 'admin' : 'user'); }, 800);
+        }
+
+        // ===== ADMIN LOGIN =====
+        function toggleAdminForm() {
+            var form = document.getElementById('admin-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function adminLogin() {
+            var pass = document.getElementById('adminPass').value;
+            hideMessages();
+            if (pass === ADMIN_PASSWORD) {
+                setSession('Admin', '', 'admin@krk.com', 'admin');
+                showSuccess('mobile-success', '✅ Admin login successful!');
+                setTimeout(function () { redirect('admin'); }, 800);
+            } else {
+                showError('admin-error', '❌ Wrong admin password. Please try again.');
+            }
+        }
+
+        // ===== HELPERS =====
+        function showError(id, msg) {
+            var el = document.getElementById(id);
+            el.textContent = msg; el.style.display = 'block';
+        }
+        function showSuccess(id, msg) {
+            var el = document.getElementById(id);
+            el.textContent = msg; el.style.display = 'block';
+        }
+        function hideMessages() {
+            ['mobile-error', 'mobile-success', 'google-error', 'admin-error'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>
